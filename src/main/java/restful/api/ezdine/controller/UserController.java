@@ -5,12 +5,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
 import restful.api.ezdine.model.RegisterUserRequest;
+import restful.api.ezdine.model.UpdateUserRequest;
 import restful.api.ezdine.model.UserResponse;
 import restful.api.ezdine.model.WebResponse;
 import restful.api.ezdine.service.UserService;
@@ -56,4 +58,19 @@ public class UserController {
                                             .build();
     }
 
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PatchMapping(
+        path = "/api/users",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<UserResponse> update(Authentication authentication, @RequestBody UpdateUserRequest request) {
+        UserResponse response = userService.update(authentication, request);
+
+        return WebResponse.<UserResponse>builder()
+                                            .status(true)
+                                            .messages("User password successfully updated")
+                                            .data(response)
+                                            .build();
+    }
 }

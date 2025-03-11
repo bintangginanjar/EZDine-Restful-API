@@ -1,6 +1,7 @@
 package restful.api.ezdine.service;
 
 import java.util.Collections;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import restful.api.ezdine.entity.RoleEntity;
 import restful.api.ezdine.entity.UserEntity;
 import restful.api.ezdine.mapper.ResponseMapper;
 import restful.api.ezdine.model.RegisterUserRequest;
+import restful.api.ezdine.model.UpdateUserRequest;
 import restful.api.ezdine.model.UserResponse;
 import restful.api.ezdine.repository.RoleRepository;
 import restful.api.ezdine.repository.UserRepository;
@@ -71,5 +73,22 @@ public class UserService {
         UserEntity user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));                    
 
         return ResponseMapper.ToUserResponseMapper(user);
+    }
+
+    @Transactional
+    public UserResponse update(Authentication authentication, UpdateUserRequest request) {
+        validationService.validate(request);
+
+        UserEntity user = userRepository.findByEmail(authentication.getName())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            
+        if (Objects.nonNull(request.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        userRepository.save(user);        
+
+        return ResponseMapper.ToUserResponseMapper(user);
+
     }
 }

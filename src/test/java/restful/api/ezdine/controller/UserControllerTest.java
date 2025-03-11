@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import restful.api.ezdine.entity.RoleEntity;
 import restful.api.ezdine.entity.UserEntity;
+import restful.api.ezdine.model.RegisterUserRequest;
+import restful.api.ezdine.model.UpdateUserRequest;
 import restful.api.ezdine.model.UserResponse;
 import restful.api.ezdine.model.WebResponse;
 import restful.api.ezdine.repository.RoleRepository;
@@ -68,6 +70,51 @@ public class UserControllerTest {
     }
 
     @Test
+    void testRegisterUserSuccess() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest();
+        request.setEmail(email);
+        request.setPassword(password);
+        request.setRole("ROLE_USER");
+
+        mockMvc.perform(
+                post("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(request.getEmail(), response.getData().getEmail());
+        });
+    }
+
+    @Test
+    void testRegisterUserBlank() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest();
+        request.setEmail("");
+        request.setPassword("");
+        request.setRole("ROLE_USER");
+
+        mockMvc.perform(
+                post("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
     void testGetUserSuccess() throws Exception {                        
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
 
@@ -105,4 +152,277 @@ public class UserControllerTest {
         });
     }
 
+    @Test
+    void testGetUserInvalidToken() throws Exception {    
+        
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);      
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+                
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                get("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testGetUserTokenExpired() throws Exception {    
+        
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);      
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+                
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testGetUserNoToken() throws Exception {    
+        
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);      
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+                
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testUpdateUserPasswordSuccess() throws Exception {                        
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);      
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+        
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setPassword("123456");
+
+        mockMvc.perform(
+                patch("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                    
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());                     
+        });
+    }
+
+    @Test
+    void testUpdateUserPasswordInvalidToken() throws Exception {                    
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));        
+        userRepository.save(user);
+        
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setPassword("123456");
+
+        mockMvc.perform(
+                patch("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                    
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                     
+        });
+    }
+
+    @Test
+    void testUpdateUserPasswordNoToken() throws Exception {        
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));        
+        userRepository.save(user);
+        
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setPassword("123456");
+
+        mockMvc.perform(
+                patch("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                    
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                     
+        });
+    }
+
+    @Test
+    void testUpdateUserPasswordTokenExpired() throws Exception {        
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));        
+        userRepository.save(user);
+        
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setPassword("123456");
+
+        mockMvc.perform(
+                patch("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                    
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<UserResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                     
+        });
+    }
 }
