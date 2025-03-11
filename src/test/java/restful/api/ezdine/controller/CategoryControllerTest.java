@@ -124,6 +124,47 @@ public class CategoryControllerTest {
     }
 
     @Test
+    void testRegisterCategoryDuplicate() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CategoryEntity category = new CategoryEntity();
+        category.setName(name);
+        category.setUserEntity(user);
+        categoryRepository.save(category);
+
+        RegisterCategoryRequest request = new RegisterCategoryRequest();
+        request.setName(name);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/categories")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<CategoryResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
     void testRegisterCategoryBlank() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
@@ -599,6 +640,48 @@ public class CategoryControllerTest {
 
             assertEquals(true, response.getStatus());
             assertEquals(request.getName(), response.getData().getName());
+        });
+    }
+
+    @Test
+    void testUpdateCategoryDuplicate() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CategoryEntity category = new CategoryEntity();
+        category.setName(name);
+        category.setUserEntity(user);
+        categoryRepository.save(category);
+
+        UpdateCategoryRequest request = new UpdateCategoryRequest();
+        request.setName(name);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<CategoryResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(category.getName(), response.getData().getName());
         });
     }
 
