@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import restful.api.ezdine.entity.CategoryEntity;
+import restful.api.ezdine.entity.FoodEntity;
 import restful.api.ezdine.entity.UserEntity;
 import restful.api.ezdine.model.CategoryResponse;
+import restful.api.ezdine.model.FoodResponse;
 import restful.api.ezdine.model.TokenResponse;
 import restful.api.ezdine.model.UserResponse;
 
@@ -45,4 +47,28 @@ public class ResponseMapper {
                                 )).collect(Collectors.toList());
     }
 
+    public static FoodResponse ToFoodResponseMapper(FoodEntity food) {
+        Integer categoryId = food.getCategoryEntity().getId();
+
+        return FoodResponse.builder()
+                .categoryId(categoryId)
+                .code(food.getCode())
+                .name(food.getName())
+                .price(food.getPrice())
+                .stock(food.getStock())
+                .build();
+    }
+
+    public static List<FoodResponse> ToFoodResponseListMapper(List<FoodEntity> foods) {
+        return foods.stream()
+                    .map(
+                        p -> new FoodResponse(
+                            p.getId(),
+                            p.getCategoryEntity().getId(),
+                            p.getCode(),
+                            p.getName(),
+                            p.getPrice(),
+                            p.getStock()
+                        )).collect(Collectors.toList());
+    }
 }

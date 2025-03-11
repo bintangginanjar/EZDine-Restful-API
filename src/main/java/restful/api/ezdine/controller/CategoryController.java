@@ -96,7 +96,7 @@ public class CategoryController {
 
         return WebResponse.<CategoryResponse>builder()
                                         .status(true)
-                                        .messages("Service update success")
+                                        .messages("Category update success")
                                         .data(response)
                                         .build();      
     }

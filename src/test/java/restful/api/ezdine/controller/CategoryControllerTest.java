@@ -119,6 +119,7 @@ public class CategoryControllerTest {
             });
 
             assertEquals(true, response.getStatus());
+            assertEquals(request.getName(), response.getData().getName());
         });
     }
 
