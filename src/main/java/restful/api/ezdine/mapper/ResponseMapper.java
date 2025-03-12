@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 
 import restful.api.ezdine.entity.CategoryEntity;
 import restful.api.ezdine.entity.FoodEntity;
+import restful.api.ezdine.entity.ProfileEntity;
 import restful.api.ezdine.entity.UserEntity;
 import restful.api.ezdine.model.CategoryResponse;
 import restful.api.ezdine.model.FoodResponse;
+import restful.api.ezdine.model.ProfileResponse;
 import restful.api.ezdine.model.TokenResponse;
 import restful.api.ezdine.model.UserResponse;
 
@@ -70,5 +72,18 @@ public class ResponseMapper {
                             p.getPrice(),
                             p.getStock()
                         )).collect(Collectors.toList());
+    }
+
+    public static ProfileResponse ToProfileResponseMapper(ProfileEntity profile) {
+        return ProfileResponse.builder()
+                .id(profile.getId())
+                .firstname(profile.getFirstname())
+                .lastname(profile.getLastname())
+                .address(profile.getAddress())
+                .phoneNumber(profile.getPhoneNumber())
+                .city(profile.getCity())
+                .province(profile.getProvince())
+                .postalCode(profile.getPostalCode())
+                .build();
     }
 }
