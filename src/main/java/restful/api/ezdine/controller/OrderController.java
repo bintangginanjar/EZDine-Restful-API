@@ -42,7 +42,7 @@ public class OrderController {
 
         return WebResponse.<OrderResponse>builder()
                                         .status(true)
-                                        .messages("Category registration success")
+                                        .messages("Order registration success")
                                         .data(response)
                                         .build();      
     }
@@ -53,7 +53,7 @@ public class OrderController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<OrderResponse> get(Authentication authentication,                                            
-                                            @PathVariable("foodId") String orderId) {
+                                            @PathVariable("orderId") String orderId) {
 
         OrderResponse response = orderService.get(authentication, orderId);
 

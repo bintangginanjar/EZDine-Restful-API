@@ -13,12 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterOrderRequest {
 
-    @NotBlank
-    private String orderId;
-
-    @NotBlank
-    private String date;
-    
     @NotNull
     private Integer subTotal;
 
