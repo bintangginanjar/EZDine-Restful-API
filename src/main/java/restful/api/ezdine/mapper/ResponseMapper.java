@@ -5,10 +5,12 @@ import java.util.stream.Collectors;
 
 import restful.api.ezdine.entity.CategoryEntity;
 import restful.api.ezdine.entity.FoodEntity;
+import restful.api.ezdine.entity.OrderEntity;
 import restful.api.ezdine.entity.ProfileEntity;
 import restful.api.ezdine.entity.UserEntity;
 import restful.api.ezdine.model.CategoryResponse;
 import restful.api.ezdine.model.FoodResponse;
+import restful.api.ezdine.model.OrderResponse;
 import restful.api.ezdine.model.ProfileResponse;
 import restful.api.ezdine.model.TokenResponse;
 import restful.api.ezdine.model.UserResponse;
@@ -85,5 +87,31 @@ public class ResponseMapper {
                 .province(profile.getProvince())
                 .postalCode(profile.getPostalCode())
                 .build();
+    }
+
+    public static OrderResponse ToOrderResponseMapper(OrderEntity order) {
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderId(order.getOrderId())    
+                .date(order.getDate())            
+                .subTotal(order.getSubTotal())        
+                .tax(order.getTax())        
+                .totalPrice(order.getTotalPrice())    
+                .status(order.getStatus())
+                .build();
+    }
+
+    public static List<OrderResponse> ToOrderResponseListMapper(List<OrderEntity> orders) {
+        return orders.stream()
+                        .map(
+                            p -> new OrderResponse(
+                                p.getId(),
+                                p.getOrderId(),
+                                p.getDate(),
+                                p.getSubTotal(),
+                                p.getTax(),
+                                p.getTotalPrice(),
+                                p.getStatus()
+                            )).collect(Collectors.toList());
     }
 }

@@ -38,6 +38,11 @@ public class OrderEntity {
 
     private String date;
     
+    @Column(name = "subtotal")
+    private Integer subTotal;
+
+    private Double tax;
+
     @Column(name = "total_price")
     private Integer totalPrice;
 
