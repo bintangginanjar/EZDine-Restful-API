@@ -857,4 +857,815 @@ public class FoodControllerTest {
             assertEquals(request.getStock(), response.getData().getStock());            
         });
     }
+
+    @Test
+    void testUpdateFoodDuplicate() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        FoodEntity dessert = new FoodEntity();
+        dessert.setCode("dessert");
+        dessert.setName("dessert");
+        dessert.setPrice(foodPrice);
+        dessert.setStock(foodStock);
+        dessert.setCategoryEntity(category);
+        foodRepository.save(dessert);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode("dessert");
+        request.setName("dessert");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                       
+        });
+    }
+
+    @Test
+    void testUpdateFoodBadCategory() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "a/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                    
+        });
+    }
+
+    @Test
+    void testUpdateFoodCategoryNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/11111/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                    
+        });
+    }
+
+    @Test
+    void testUpdateFoodBadId() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId() + "a")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                    
+        });
+    }
+
+    @Test
+    void testUpdateFoodNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/11111")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                    
+        });
+    }
+
+    @Test
+    void testUpdateFoodInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());           
+        });
+    }
+
+    @Test
+    void testUpdateFoodTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());           
+        });
+    }
+
+    @Test
+    void testUpdateFoodNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                                              
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());           
+        });
+    }
+
+    @Test
+    void testUpdateFoodBadRole() throws Exception {
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        user.setRoles(Collections.singletonList(role));        
+        userRepository.save(user);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+        
+        UpdateFoodRequest request = new UpdateFoodRequest();
+        request.setCode(foodCode + " updated");
+        request.setName(foodName + " updated");
+        request.setPrice(foodPrice + 5);
+        request.setStock(foodStock + 10);        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<FoodResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());           
+        });
+    }
+
+    @Test
+    void testDeleteFoodSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testDeleteFoodBadCategory() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "a/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testDeleteFoodCategoryNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/999999/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testDeleteFoodBadFood() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId() + "a")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testDeleteFoodNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/99999")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());            
+        });
+    }
+
+    @Test
+    void testDeleteFoodInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                        
+        });
+    }
+
+    @Test
+    void testDeleteFoodTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                        
+        });
+    }
+
+    @Test
+    void testDeleteFoodNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                    
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());                        
+        });
+    }
+
+    @Test
+    void testDeleteFoodBadRole() throws Exception {
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        CategoryEntity category = categoryRepository.findByName(categoryName).orElse(null);
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        user.setRoles(Collections.singletonList(role));        
+        userRepository.save(user);
+
+        FoodEntity food = new FoodEntity();
+        food.setCode(foodCode);
+        food.setName(foodName);
+        food.setPrice(foodPrice);
+        food.setStock(foodStock);
+        food.setCategoryEntity(category);
+        foodRepository.save(food);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/categories/" + category.getId() + "/foods/" + food.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());           
+        });
+    }
 }
