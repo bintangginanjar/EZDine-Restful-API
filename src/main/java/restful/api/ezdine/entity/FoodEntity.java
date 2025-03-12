@@ -32,8 +32,10 @@ public class FoodEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
+    @Column(unique = true, nullable = false)
     private String code;
 
+    @Column(unique = true, nullable = false)
     private String name;
     
     private Integer price;

@@ -1,5 +1,6 @@
 package restful.api.ezdine.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -132,6 +133,15 @@ public class CustomExcHandler {
     @ExceptionHandler
     public ResponseEntity<WebResponse<String>> credentialNotFoundException(AuthenticationCredentialsNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(WebResponse.<String>builder()
+                                            .status(false)
+                                            .errors(exception.getMessage())
+                                            .build());
+    }
+    
+    @ExceptionHandler
+    public ResponseEntity<WebResponse<String>> dataIntegrityViolationException(DataIntegrityViolationException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.<String>builder()
                                             .status(false)
                                             .errors(exception.getMessage())

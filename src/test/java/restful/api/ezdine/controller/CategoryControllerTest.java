@@ -642,18 +642,23 @@ public class CategoryControllerTest {
             assertEquals(request.getName(), response.getData().getName());
         });
     }
-
+    
     @Test
     void testUpdateCategoryDuplicate() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CategoryEntity category = new CategoryEntity();
-        category.setName(name);
-        category.setUserEntity(user);
-        categoryRepository.save(category);
+        CategoryEntity appetizer = new CategoryEntity();
+        appetizer.setName(name);
+        appetizer.setUserEntity(user);
+        categoryRepository.save(appetizer);
 
+        CategoryEntity mainCourse = new CategoryEntity();
+        mainCourse.setName("main course");
+        mainCourse.setUserEntity(user);
+        categoryRepository.save(mainCourse);
+        
         UpdateCategoryRequest request = new UpdateCategoryRequest();
-        request.setName(name);        
+        request.setName("main course");        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -669,19 +674,18 @@ public class CategoryControllerTest {
         String mockBearerToken = "Bearer " + mockToken;
 
         mockMvc.perform(
-                patch("/api/categories/" + category.getId())
+                patch("/api/categories/" + appetizer.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .header("Authorization", mockBearerToken)                        
         ).andExpectAll(
-                status().isOk()
+                status().isBadRequest()
         ).andDo(result -> {
                 WebResponse<CategoryResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
             });
 
-            assertEquals(true, response.getStatus());
-            assertEquals(category.getName(), response.getData().getName());
+            assertEquals(false, response.getStatus());        
         });
     }
 

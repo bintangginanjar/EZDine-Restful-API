@@ -100,7 +100,7 @@ public class CategoryService {
         CategoryEntity category = categoryRepository.findFirstByUserEntityAndId(user, categoryId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
-        if (Objects.nonNull(request.getName()) && !(category.getName().equals(request.getName()))) {
+        if (Objects.nonNull(request.getName())) {
             category.setName(request.getName());
         }
 
