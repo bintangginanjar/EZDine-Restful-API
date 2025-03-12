@@ -14,8 +14,7 @@ public class RegisterProfileRequest {
 
     @NotBlank
     private String firstname;
-    
-    @NotBlank
+        
     private String lastname;
 
     private String address;
