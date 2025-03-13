@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import restful.api.ezdine.entity.CategoryEntity;
 import restful.api.ezdine.entity.FoodEntity;
 import restful.api.ezdine.entity.OrderEntity;
+import restful.api.ezdine.entity.OrderItemEntity;
 import restful.api.ezdine.entity.ProfileEntity;
 import restful.api.ezdine.entity.UserEntity;
 import restful.api.ezdine.model.CategoryResponse;
 import restful.api.ezdine.model.FoodResponse;
+import restful.api.ezdine.model.OrderItemResponse;
 import restful.api.ezdine.model.OrderResponse;
 import restful.api.ezdine.model.ProfileResponse;
 import restful.api.ezdine.model.TokenResponse;
@@ -113,5 +115,29 @@ public class ResponseMapper {
                                 p.getTotalPrice(),
                                 p.getStatus()
                             )).collect(Collectors.toList());
+    }
+
+    public static OrderItemResponse ToOrderItemResponseMapper(OrderItemEntity item) {
+        return OrderItemResponse.builder()
+                .id(item.getId())
+                .orderId(item.getOrderEntity().getId())
+                .foodId(item.getFoodEntity().getId())
+                .foodName(item.getFoodEntity().getName())
+                .quantity(item.getQuantity())
+                .subTotal(item.getSubTotal())
+                .build();
+    }
+
+    public static List<OrderItemResponse> ToOrderItemResponseListMapper(List<OrderItemEntity> items) {
+        return items.stream()
+                        .map(
+                            p -> new OrderItemResponse(
+                                p.getId(),
+                                p.getOrderEntity().getId(),
+                                p.getFoodEntity().getId(),
+                                p.getFoodEntity().getName(),
+                                p.getQuantity(),
+                                p.getSubTotal()
+                            )).collect(Collectors.toList());        
     }
 }

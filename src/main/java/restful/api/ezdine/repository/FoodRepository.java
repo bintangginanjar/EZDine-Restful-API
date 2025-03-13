@@ -9,6 +9,8 @@ import restful.api.ezdine.entity.FoodEntity;
 
 public interface FoodRepository extends JpaRepository<FoodEntity, Integer>{
 
+    Optional<FoodEntity> findFirstById(Integer id);
+
     Optional<FoodEntity> findFirstByCategoryEntityAndId(CategoryEntity category, Integer id);
 
     Optional<FoodEntity> findByName(String name);
