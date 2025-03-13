@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -909,6 +910,315 @@ public class OrderItemControllerTest {
                 status().isForbidden()
         ).andDo(result -> {
                 WebResponse<OrderItemResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetListItemSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/orders/" + order.getId() + "/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());                        
+        });
+    }
+
+    @Test
+    void testGetListItemBadOrder() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/orders/" + order.getId() + "a/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetListItemOrderNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/orders/9999999/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetListItemInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                get("/api/orders/" + order.getId() + "/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetListItemTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/orders/" + order.getId() + "/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetListItemNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        FoodEntity food = foodRepository.findByName(foodName).orElse(null);
+
+        Date date = new Date();
+
+        OrderEntity order = new OrderEntity();
+        order.setUserEntity(user);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setDate(date.toString());
+        order.setSubTotal(subTotal);
+        order.setTax(tax);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.setFoodEntity(food);
+        item.setOrderEntity(order);
+        item.setQuantity(itemQuantity);
+        item.setSubTotal(itemSubTotal);
+        orderItemRepository.save(item);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        mockMvc.perform(
+                get("/api/orders/" + order.getId() + "/items")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                     
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<List<OrderItemResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
             });
 
             assertEquals(false, response.getStatus());
