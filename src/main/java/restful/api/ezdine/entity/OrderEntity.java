@@ -48,6 +48,8 @@ public class OrderEntity {
 
     private String status;
 
+    private String remark;
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;

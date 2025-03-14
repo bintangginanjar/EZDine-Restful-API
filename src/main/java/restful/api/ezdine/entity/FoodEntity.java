@@ -47,6 +47,8 @@ public class FoodEntity {
 
     @Column(name = "photo_url")
     private String photoUrl;
+    
+    private String description;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
