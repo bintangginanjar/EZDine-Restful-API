@@ -25,9 +25,13 @@ public class UpdateFoodRequest {
     private String code;
 
     private String name;
+
+    private String description;
     
-    private Integer price;
+    private Double price;
 
     private Integer stock;
+
+    private String photoUrl;
 
 }

@@ -57,11 +57,14 @@ public class ResponseMapper {
         Integer categoryId = food.getCategoryEntity().getId();
 
         return FoodResponse.builder()
+                .id(food.getId())
                 .categoryId(categoryId)
                 .code(food.getCode())
                 .name(food.getName())
+                .description(food.getDescription())
                 .price(food.getPrice())
                 .stock(food.getStock())
+                .photoUrl(food.getPhotoUrl())
                 .build();
     }
 
@@ -73,8 +76,10 @@ public class ResponseMapper {
                             p.getCategoryEntity().getId(),
                             p.getCode(),
                             p.getName(),
+                            p.getDescription(),
                             p.getPrice(),
-                            p.getStock()
+                            p.getStock(),
+                            p.getPhotoUrl()
                         )).collect(Collectors.toList());
     }
 

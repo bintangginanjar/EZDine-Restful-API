@@ -24,11 +24,17 @@ public class RegisterFoodRequest {
 
     @NotBlank
     private String name;
+
+    @NotBlank
+    private String description;
     
     @NotNull
-    private Integer price;
+    private Double price;
 
     @NotNull
     private Integer stock;
+
+    @NotNull
+    private String photoUrl;
 
 }

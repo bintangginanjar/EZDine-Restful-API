@@ -94,7 +94,7 @@ public class OrderItemControllerTest {
 
     private final String foodCode = "spaghetti";
     private final String foodName = "spaghetti bolognese";
-    private final Integer foodPrice = 20;
+    private final Double foodPrice = 20.0;
     private final Integer foodStock = 0;
 
     private final Integer itemQuantity = 2;

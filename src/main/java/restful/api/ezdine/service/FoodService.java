@@ -69,8 +69,10 @@ public class FoodService {
         FoodEntity food = new FoodEntity();
         food.setCode(request.getCode());
         food.setName(request.getName());
+        food.setDescription(request.getDescription());
         food.setPrice(request.getPrice());
         food.setStock(request.getStock());
+        food.setPhotoUrl(request.getPhotoUrl());
         food.setCategoryEntity(category);
 
         foodRepository.save(food);
@@ -140,6 +142,14 @@ public class FoodService {
 
         if (Objects.nonNull(request.getName())) {
             food.setName(request.getName());
+        }
+
+        if (Objects.nonNull(request.getDescription())) {
+            food.setDescription(request.getDescription());
+        }
+
+        if (Objects.nonNull(request.getPhotoUrl())) {
+            food.setPhotoUrl(request.getPhotoUrl());
         }
 
         if (Objects.nonNull(request.getPrice())) {

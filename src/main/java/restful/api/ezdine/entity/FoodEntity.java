@@ -38,12 +38,9 @@ public class FoodEntity {
     @Column(unique = true, nullable = false)
     private String name;
     
-    private Integer price;
+    private Double price;
 
     private Integer stock;
-
-    @Column(name = "is_ready")
-    private Boolean isReady;
 
     @Column(name = "photo_url")
     private String photoUrl;
