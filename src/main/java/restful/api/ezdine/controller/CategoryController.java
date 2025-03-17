@@ -101,7 +101,7 @@ public class CategoryController {
                                         .build();      
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  
     @DeleteMapping(
         path = "/api/categories/{categoryId}",                
         produces = MediaType.APPLICATION_JSON_VALUE

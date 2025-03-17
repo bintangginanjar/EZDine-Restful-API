@@ -24,6 +24,8 @@ public class UpdateFoodRequest {
 
     private String code;
 
+    private String newCategoryId;
+
     private String name;
 
     private String description;

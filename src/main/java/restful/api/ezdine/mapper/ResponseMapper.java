@@ -59,6 +59,7 @@ public class ResponseMapper {
         return FoodResponse.builder()
                 .id(food.getId())
                 .categoryId(categoryId)
+                .categoryName(food.getCategoryEntity().getName())
                 .code(food.getCode())
                 .name(food.getName())
                 .description(food.getDescription())
@@ -74,6 +75,7 @@ public class ResponseMapper {
                         p -> new FoodResponse(
                             p.getId(),
                             p.getCategoryEntity().getId(),
+                            p.getCategoryEntity().getName(),
                             p.getCode(),
                             p.getName(),
                             p.getDescription(),

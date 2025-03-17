@@ -118,11 +118,13 @@ public class FoodService {
                                 String strCategoryId, String strFoodId) {
 
         Integer categoryId = 0;
+        Integer newCategoryId = 0;
         Integer foodId = 0;
 
         try {
             categoryId = Integer.parseInt(strCategoryId);       
-            foodId = Integer.parseInt(strFoodId);       
+            foodId = Integer.parseInt(strFoodId);
+            newCategoryId = Integer.parseInt(request.getNewCategoryId());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
@@ -135,6 +137,13 @@ public class FoodService {
 
         FoodEntity food = foodRepository.findFirstByCategoryEntityAndId(category, foodId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Food not found"));
+
+        if (Objects.nonNull(request.getNewCategoryId())) {
+            CategoryEntity newCategory = categoryRepository.findFirstByUserEntityAndId(user, newCategoryId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
+            food.setCategoryEntity(newCategory);
+        }
 
         if (Objects.nonNull(request.getCode())) {
             food.setCode(request.getCode());

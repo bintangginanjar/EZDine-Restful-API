@@ -15,6 +15,8 @@ public class FoodResponse {
 
     private Integer categoryId;
 
+    private String categoryName;
+
     private String code;
 
     private String name;
