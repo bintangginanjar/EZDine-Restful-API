@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
@@ -35,11 +36,13 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/users/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/foods").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest()
                     .authenticated())            
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint()));
-        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);            
+        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.headers(headers -> headers.addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*")));
 
         return http.build();
     }
